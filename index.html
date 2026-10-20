@@ -80,10 +80,11 @@
             <p class="try">Try: “What's the latest in the Strait of Hormuz, and what does it mean for gas prices in Arizona?”</p>
           </div>
         </div>
+        <p class="more-cue" id="logCue" aria-hidden="true" hidden>Scroll for more ↓</p>
         <form class="composer" id="composer" novalidate>
           <label class="sr-only" for="chatInput">Your question</label>
           <div class="composer-row">
-            <textarea id="chatInput" rows="1" maxlength="3000" placeholder="Ask about any country…" autocomplete="off"></textarea>
+            <textarea id="chatInput" rows="1" maxlength="3000" placeholder="Ask a question…" autocomplete="off"></textarea>
             <div class="composer-btns">
               <button type="button" class="mic-btn" id="micBtn" aria-pressed="false" aria-label="Start voice input" hidden>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11.5" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
@@ -105,11 +106,14 @@
         <p class="tile-kind" id="topKind">World signal</p>
         <p class="tile-title" id="topName">Waiting for your first question</p>
       </div>
-      <div class="score-row">
-        <span class="score-label">Impact score</span>
-        <span class="score-val" id="topScore">—</span>
+      <div class="card-scroll" id="topScroll">
+        <div class="score-row">
+          <span class="score-label">Impact score</span>
+          <span class="score-val" id="topScore">—</span>
+        </div>
+        <p class="why" id="topWhy">Ask a question and the most important story for you shows up here.</p>
       </div>
-      <p class="why" id="topWhy">Ask a question and the most important story for you shows up here.</p>
+      <p class="more-cue" id="topCue" aria-hidden="true" hidden>Scroll for more ↓</p>
     </section>
 
     <section class="card side short-card" id="shortCard" aria-labelledby="shortTitle">
@@ -122,15 +126,21 @@
         </svg>
         <p class="rank-note" id="rankNote">Stories you ask about are ranked here by how much they could affect you.</p>
       </div>
-      <ol class="short-list" id="shortList"></ol>
-      <p class="short-empty" id="shortEmpty">Nothing ranked yet.</p>
+      <div class="card-scroll" id="shortScroll">
+        <ol class="short-list" id="shortList"></ol>
+        <p class="short-empty" id="shortEmpty">Nothing ranked yet.</p>
+      </div>
+      <p class="more-cue" id="shortCue" aria-hidden="true" hidden>Scroll for more ↓</p>
     </section>
 
     <section class="card side detail-card" id="detailCard" aria-labelledby="detailTitle">
       <h2 id="detailTitle">Story details</h2>
-      <p class="detail-empty" id="detailEmpty">Pick a story from the shortlist to see its region, status, market angle, daily-life angle and what to watch next.</p>
-      <dl class="fields" id="detailFields"></dl>
-      <a class="guide-link" id="guideLink" href="/guide" hidden>Read the guide entry</a>
+      <div class="card-scroll" id="detailScroll">
+        <p class="detail-empty" id="detailEmpty">Pick a story from the shortlist to see its region, status, market angle, daily-life angle and what to watch next.</p>
+        <dl class="fields" id="detailFields"></dl>
+        <a class="guide-link" id="guideLink" href="/guide" hidden>Read the guide entry</a>
+      </div>
+      <p class="more-cue" id="detailCue" aria-hidden="true" hidden>Scroll for more ↓</p>
       <div class="next-step" id="nextWrap" hidden>
         <h3>Next step</h3>
         <p id="nextText"></p>

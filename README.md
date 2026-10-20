@@ -35,6 +35,7 @@ A world-news and politics engine for everyday decisions. You ask about any count
 - Guardian articles and FRED market data, if you add those keys.
 - Claude web search with citations.
 - Ranked story cards, voice input, the downloadable `.txt` briefing and full-page chat.
+- Nothing gets cut off. Card heights are measured from your real window and recomputed on resize, zoom and text-size changes. Long content scrolls inside its card with a "Scroll for more" cue, and Next step stays pinned. New replies open at their first line. If a reply hits the token limit, the server continues it, and it repairs missing story lines with one short follow-up call.
 
 **Needs a bigger build**
 - Push or email alerts when something breaks.
