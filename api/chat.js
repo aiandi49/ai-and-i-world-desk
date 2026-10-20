@@ -13,7 +13,7 @@ const MAX_MESSAGE_CHARS = 4000;
 const MAX_TOTAL_CHARS = 60000;
 const RATE_WINDOW_MS = 600 * 1000;   // matches the Vercel Firewall rule: 20 requests / 600 s per IP
 const RATE_MAX = 20;
-const UPSTREAM_DEADLINE_MS = 100 * 1000; // shorter than maxDuration (120 s) in vercel.json
+const UPSTREAM_DEADLINE_MS = 270 * 1000; // shorter than maxDuration (300 s) in vercel.json; covers search, continuation and repair
 const FEED_TIMEOUT_MS = 6000;
 const WEB_SEARCH_MAX_USES = 3;
 
@@ -366,43 +366,56 @@ ${feeds}`;
 }
 
 // ---------- Anthropic ----------
-async function callClaude(apiKey, system, messages, deadline, webSearchOn) {
-  const tools = webSearchOn ? [{ type: 'web_search_20250305', name: 'web_search', max_uses: WEB_SEARCH_MAX_USES }] : undefined;
-  let convo = messages.slice();
-  let last = null;
-  for (let turn = 0; turn < 3; turn++) {
-    const remaining = deadline - Date.now();
-    if (remaining < 3000) break;
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), remaining);
-    let r;
-    try {
-      const body = {
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
-        output_config: { effort: EFFORT },
-        system,
-        messages: convo
-      };
-      if (tools) body.tools = tools;
-      r = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        signal: ctrl.signal,
-        headers: {
-          'content-type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify(body)
-      });
-    } finally {
-      clearTimeout(t);
-    }
+async function postMessages(apiKey, body, deadline) {
+  const remaining = deadline - Date.now();
+  if (remaining < 3000) return null;
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), remaining);
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      signal: ctrl.signal,
+      headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify(body)
+    });
     if (!r.ok) {
       console.error('upstream status', r.status);
       return null;
     }
-    last = await r.json();
+    return await r.json();
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+// Gathers text and citations from every response (including paused server-tool turns).
+function collect(resp, acc) {
+  const blocks = resp && Array.isArray(resp.content) ? resp.content : [];
+  for (const b of blocks) {
+    if (b && b.type === 'text' && typeof b.text === 'string') {
+      acc.text += b.text;
+      if (Array.isArray(b.citations)) {
+        for (const c of b.citations) {
+          if (c && typeof c.url === 'string' && /^https?:\/\//.test(c.url) && !acc.seen.has(c.url)) {
+            acc.seen.add(c.url);
+            acc.sources.push({ url: c.url.slice(0, 500), title: clean(c.title, 160) });
+          }
+        }
+      }
+    }
+  }
+}
+
+// One answer, following pause_turn until the model finishes.
+async function answer(apiKey, system, messages, deadline, tools, acc) {
+  let convo = messages.slice();
+  let last = null;
+  for (let turn = 0; turn < 4; turn++) {
+    const body = { model: MODEL, max_tokens: MAX_TOKENS, output_config: { effort: EFFORT }, system, messages: convo };
+    if (tools) body.tools = tools;
+    last = await postMessages(apiKey, body, deadline);
+    if (!last) break;
+    collect(last, acc);
     if (last.stop_reason === 'pause_turn' && Array.isArray(last.content)) {
       convo = convo.concat([{ role: 'assistant', content: last.content }]);
       continue;
@@ -412,25 +425,46 @@ async function callClaude(apiKey, system, messages, deadline, webSearchOn) {
   return last;
 }
 
-function extract(resp) {
-  const blocks = resp && Array.isArray(resp.content) ? resp.content : [];
-  let text = '';
-  const sources = [];
-  const seen = new Set();
-  for (const b of blocks) {
-    if (b && b.type === 'text' && typeof b.text === 'string') {
-      text += b.text;
-      if (Array.isArray(b.citations)) {
-        for (const c of b.citations) {
-          if (c && typeof c.url === 'string' && /^https?:\/\//.test(c.url) && !seen.has(c.url)) {
-            seen.add(c.url);
-            sources.push({ url: c.url.slice(0, 500), title: clean(c.title, 160) });
-          }
-        }
-      }
-    }
+const CONTINUE_PROMPT = 'Your previous reply was cut off before it finished. Continue from exactly where it stopped. Do not repeat anything and do not add a preamble. Finish the answer, then the Next step line and the MATCH lines if the reply is about specific stories.';
+const REPAIR_PROMPT = 'Your last reply is missing its machine-readable lines. Reply with ONLY these lines and nothing else: a line starting with "Next step:" (only if your reply did not already have one), then one MATCH line per story you discussed, in the exact MATCH format from your instructions, each valid one-line JSON.';
+
+const NEXT_RE = /^\**\s*Next step\s*:/im;
+function hasValidMatch(text) {
+  return String(text).split(/\r?\n/).some((l) => {
+    const t = l.trim();
+    if (!/^MATCH\s*:/i.test(t)) return false;
+    try { const o = JSON.parse(t.replace(/^MATCH\s*:\s*/i, '')); return !!o && typeof o.title === 'string'; } catch { return false; }
+  });
+}
+function isClarifyingOnly(text) {
+  const t = String(text).trim();
+  return t.length < 700 && /\?\s*$/.test(t) && !NEXT_RE.test(t);
+}
+
+async function callClaude(apiKey, system, messages, deadline, webSearchOn) {
+  const tools = webSearchOn ? [{ type: 'web_search_20250305', name: 'web_search', max_uses: WEB_SEARCH_MAX_USES }] : undefined;
+  const acc = { text: '', sources: [], seen: new Set() };
+  let last = await answer(apiKey, system, messages, deadline, tools, acc);
+
+  // Continue any reply that stopped at max_tokens (up to two more calls).
+  for (let i = 0; i < 2 && last && last.stop_reason === 'max_tokens' && acc.text.trim(); i++) {
+    const convo = messages.concat([{ role: 'assistant', content: acc.text.trimEnd() }, { role: 'user', content: CONTINUE_PROMPT }]);
+    if (!/\s$/.test(acc.text)) acc.text += ' ';
+    last = await answer(apiKey, system, convo, deadline, undefined, acc);
   }
-  return { text: text.trim(), sources: sources.slice(0, 8) };
+
+  // Repair missing or malformed MATCH lines with one short follow-up call.
+  if (acc.text.trim() && !hasValidMatch(acc.text) && !isClarifyingOnly(acc.text)) {
+    const kept = acc.text.split(/\r?\n/).filter((l) => !/^\s*MATCH\s*:/i.test(l)).join('\n').trimEnd();
+    const convo = messages.concat([{ role: 'assistant', content: kept }, { role: 'user', content: REPAIR_PROMPT }]);
+    const fix = { text: '', sources: [], seen: new Set() };
+    await answer(apiKey, system, convo, deadline, undefined, fix);
+    const hadNext = NEXT_RE.test(kept);
+    const extra = fix.text.split(/\r?\n/).map((l) => l.trim())
+      .filter((l) => /^MATCH\s*:/i.test(l) || (!hadNext && /^\**\s*Next step\s*:/i.test(l)));
+    acc.text = extra.length ? kept + '\n' + extra.join('\n') : kept;
+  }
+  return { text: acc.text.trim(), sources: acc.sources.slice(0, 8) };
 }
 
 // ---------- handler ----------
@@ -520,14 +554,13 @@ export default async function handler(req, res) {
     const webSearchOn = String(process.env.WEB_SEARCH || 'on').toLowerCase() !== 'off';
     const system = systemPrompt(today, guideList, guideFull, feeds, webSearchOn);
 
-    let resp;
+    let out;
     try {
-      resp = await callClaude(apiKey, system, merged, deadline, webSearchOn);
+      out = await callClaude(apiKey, system, merged, deadline, webSearchOn);
     } catch {
       console.error('upstream request failed');
       return send(res, 502, { error: GENERIC_ERROR });
     }
-    const out = extract(resp);
     if (!out.text) return send(res, 502, { error: GENERIC_ERROR });
     return send(res, 200, { reply: out.text, sources: out.sources });
   } catch {
