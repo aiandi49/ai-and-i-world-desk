@@ -1,0 +1,10 @@
+{
+  "name": "ai-and-i-world-desk",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AI&I World Desk: a world news and politics engine with live free news feeds, plus a verified guide.",
+  "engines": {
+    "node": ">=20"
+  }
+}

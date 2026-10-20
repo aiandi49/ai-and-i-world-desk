@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-font-size="sm" data-default-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI&amp;I World Desk</title>
+<meta name="description" content="Ask about world news and politics anywhere. The World Desk checks live global news, disaster alerts and market data, then tells you what it means for your daily life and your money.">
+<meta name="color-scheme" content="dark light">
+<script>(function(){var d=document.documentElement;try{var t=localStorage.getItem('pref-theme');if(t==='light'||t==='dark'){d.setAttribute('data-theme',t);}else{d.setAttribute('data-theme',d.getAttribute('data-default-theme')||'light');}var f=localStorage.getItem('pref-font-size');if(f==='sm'||f==='md'||f==='lg'||f==='xl'){d.setAttribute('data-font-size',f);}}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="/assets/engine.css">
+<link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+</head>
+<body>
+<a class="skip" href="#chatInput">Skip to the question box</a>
+<div class="glow" aria-hidden="true"></div>
+
+<header class="nav">
+  <div class="nav-row">
+    <a class="brand" href="/" aria-label="AI&amp;I World Desk home">
+      <span class="brand-mark" aria-hidden="true">W</span>
+      <span class="brand-name"><span class="brand-top">AI&amp;I</span><span class="brand-bottom">World Desk</span></span>
+    </a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="/" aria-current="page">Engine</a>
+      <a href="/guide">Guide</a>
+      <a href="/guide?t=live-sources">Sources</a>
+    </nav>
+    <div class="prefs">
+      <div class="size-group" role="group" aria-label="Text size">
+        <button type="button" class="size-btn s1" data-size="sm" aria-pressed="true" aria-label="Text size small (current)">A</button>
+        <button type="button" class="size-btn s2" data-size="md" aria-pressed="false" aria-label="Text size medium">A</button>
+        <button type="button" class="size-btn s3" data-size="lg" aria-pressed="false" aria-label="Text size large">A</button>
+        <button type="button" class="size-btn s4" data-size="xl" aria-pressed="false" aria-label="Text size extra large">A</button>
+      </div>
+      <button type="button" class="theme-btn" id="themeToggle" aria-pressed="true" aria-label="Switch to light theme">
+        <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+        <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" aria-labelledby="heroTitle">
+    <p class="chip"><span class="dot" aria-hidden="true"></span>Live world desk · free global news feeds</p>
+    <h1 id="heroTitle">See the world's news <span class="grad">before it hits you</span></h1>
+    <p class="subline"><strong>Ask about any country, crisis, election or shortage.</strong><br><strong>Get what it means for your day, your wallet and the markets.</strong></p>
+    <div class="hero-links">
+      <a class="chip-link" href="/guide">Read the full guide</a>
+      <a class="chip-link" href="/guide?t=markets-geopolitics">News into a market view</a>
+    </div>
+  </section>
+
+  <div class="board" id="board">
+    <div class="chat-slot" id="chatSlot">
+      <section class="card chat-card" id="chatCard" aria-labelledby="chatTitle">
+        <div class="chat-head">
+          <h2 id="chatTitle">Ask the Desk</h2>
+          <div class="chat-actions">
+            <button type="button" class="icon-btn" id="downloadBtn" aria-label="Download your world briefing" title="Download your world briefing" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>
+            </button>
+            <button type="button" class="icon-btn" id="resetBtn" aria-label="Start over" title="Start over">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v3.8h3.8"/></svg>
+            </button>
+            <button type="button" class="icon-btn" id="fullBtn" aria-pressed="false" aria-label="Full page" title="Full page">
+              <svg class="i-expand" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 9V4.5H9M15 4.5h4.5V9M19.5 15v4.5H15M9 19.5H4.5V15"/></svg>
+              <svg class="i-collapse" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4.5V9H4.5M19.5 9H15V4.5M15 19.5V15h4.5M4.5 15H9v4.5"/></svg>
+            </button>
+          </div>
+          <p class="card-sub">Live world news, checked for you.</p>
+        </div>
+        <p class="count-chip" id="countChip" aria-live="polite">No messages yet</p>
+        <div class="log" id="log" role="log" aria-live="polite" aria-relevant="additions text" tabindex="0">
+          <div class="msg bot intro">
+            <p>Hi, I'm the World Desk. Ask me about anything happening anywhere: a war, an election, a shortage, a crash, a policy fight. I'll check live news and tell you what it means for you.</p>
+            <p class="try">Try: “What's the latest in the Strait of Hormuz, and what does it mean for gas prices in Arizona?”</p>
+          </div>
+        </div>
+        <form class="composer" id="composer" novalidate>
+          <label class="sr-only" for="chatInput">Your question</label>
+          <div class="composer-row">
+            <textarea id="chatInput" rows="1" maxlength="3000" placeholder="Ask about any country…" autocomplete="off"></textarea>
+            <div class="composer-btns">
+              <button type="button" class="mic-btn" id="micBtn" aria-pressed="false" aria-label="Start voice input" hidden>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11.5" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
+              </button>
+              <button type="submit" class="send-btn" id="sendBtn">Send</button>
+            </div>
+          </div>
+          <p class="mic-status" id="micStatus" hidden>Listening. Take your time; the mic turns off after 10 seconds of silence.</p>
+          <p class="form-error" id="formError" role="alert" hidden></p>
+        </form>
+        <p class="chat-note">This chat stays in this tab and clears when you close it.</p>
+      </section>
+    </div>
+
+    <section class="card side top-card" id="topCard" aria-labelledby="topTitle">
+      <h2 class="sr-only" id="topTitle">Top match</h2>
+      <p class="pill">Top match</p>
+      <div class="tile" id="topTile">
+        <p class="tile-kind" id="topKind">World signal</p>
+        <p class="tile-title" id="topName">Waiting for your first question</p>
+      </div>
+      <div class="score-row">
+        <span class="score-label">Impact score</span>
+        <span class="score-val" id="topScore">—</span>
+      </div>
+      <p class="why" id="topWhy">Ask a question and the most important story for you shows up here.</p>
+    </section>
+
+    <section class="card side short-card" id="shortCard" aria-labelledby="shortTitle">
+      <h2 id="shortTitle">Shortlist</h2>
+      <div class="gauge-row">
+        <svg class="gauge" viewBox="0 0 64 64" role="img" aria-labelledby="gaugeText">
+          <circle class="g-track" cx="32" cy="32" r="26"/>
+          <circle class="g-fill" id="gaugeFill" cx="32" cy="32" r="26" stroke-dasharray="0 163.4" transform="rotate(-90 32 32)"/>
+          <text x="32" y="37" text-anchor="middle" class="g-text" id="gaugeText">—</text>
+        </svg>
+        <p class="rank-note" id="rankNote">Stories you ask about are ranked here by how much they could affect you.</p>
+      </div>
+      <ol class="short-list" id="shortList"></ol>
+      <p class="short-empty" id="shortEmpty">Nothing ranked yet.</p>
+    </section>
+
+    <section class="card side detail-card" id="detailCard" aria-labelledby="detailTitle">
+      <h2 id="detailTitle">Story details</h2>
+      <p class="detail-empty" id="detailEmpty">Pick a story from the shortlist to see its region, status, market angle, daily-life angle and what to watch next.</p>
+      <dl class="fields" id="detailFields"></dl>
+      <a class="guide-link" id="guideLink" href="/guide" hidden>Read the guide entry</a>
+      <div class="next-step" id="nextWrap" hidden>
+        <h3>Next step</h3>
+        <p id="nextText"></p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="foot">
+  <p>AI&amp;I World Desk · Live data from GDELT, six world news desks, GDACS and USGS, plus Guardian and FRED when enabled. Facts are checked at the time you ask; confirm before acting. Market information is not financial advice. Voice input may be processed by your browser's maker (Google for Chrome, Apple for Safari).</p>
+</footer>
+
+<script src="/assets/prefs.js" defer></script>
+<script src="/assets/engine.js" defer></script>
+</body>
+</html>

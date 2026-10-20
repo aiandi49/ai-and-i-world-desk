@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en" data-theme="light" data-font-size="sm" data-default-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>World Desk Guide · AI&amp;I</title>
+<meta name="description" content="A plain-language guide to the world stories shaping prices, markets and politics right now, with every claim checked against its source.">
+<meta name="color-scheme" content="light dark">
+<script>(function(){var d=document.documentElement;try{var t=localStorage.getItem('pref-theme');if(t==='light'||t==='dark'){d.setAttribute('data-theme',t);}else{d.setAttribute('data-theme',d.getAttribute('data-default-theme')||'light');}var f=localStorage.getItem('pref-font-size');if(f==='sm'||f==='md'||f==='lg'||f==='xl'){d.setAttribute('data-font-size',f);}}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&amp;family=Source+Sans+3:wght@400;600;700&amp;display=swap">
+<link rel="stylesheet" href="/assets/guide.css">
+<link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="nav">
+  <div class="nav-row">
+    <a class="brand" href="/" aria-label="AI&amp;I World Desk engine">
+      <span class="brand-mark" aria-hidden="true">W</span>
+      <span class="brand-name"><span class="brand-top">AI&amp;I</span><span class="brand-bottom">World Desk</span></span>
+    </a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="/">Engine</a>
+      <a href="/guide" id="navGuide">Guide</a>
+      <a href="/guide?t=live-sources" id="navSources">Sources</a>
+    </nav>
+    <div class="prefs">
+      <div class="size-group" role="group" aria-label="Text size">
+        <button type="button" class="size-btn s1" data-size="sm" aria-pressed="true" aria-label="Text size small (current)">A</button>
+        <button type="button" class="size-btn s2" data-size="md" aria-pressed="false" aria-label="Text size medium">A</button>
+        <button type="button" class="size-btn s3" data-size="lg" aria-pressed="false" aria-label="Text size large">A</button>
+        <button type="button" class="size-btn s4" data-size="xl" aria-pressed="false" aria-label="Text size extra large">A</button>
+      </div>
+      <button type="button" class="theme-btn" id="themeToggle" aria-pressed="false" aria-label="Switch to dark theme">
+        <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+        <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="content" tabindex="-1">
+  <!-- Hub view -->
+  <div id="hubView">
+    <section class="hero">
+      <div class="wrap">
+        <p class="kicker">The World Desk guide</p>
+        <h1>What's really happening in the world, and what it means for you</h1>
+        <p class="lede">Eighteen stories shaping prices, markets and politics this fall, written in plain language. Every claim was checked against its source, and anything we couldn't confirm is labeled.</p>
+        <ul class="stats" aria-label="Guide at a glance">
+          <li><strong id="statCount">18</strong><span>topics</span></li>
+          <li><strong id="statChecked">Oct 19, 2026</strong><span>last checked</span></li>
+          <li><strong id="statSources">40+</strong><span>linked sources</span></li>
+        </ul>
+        <div class="hero-cta">
+          <a class="btn primary" href="/">Ask the World Desk</a>
+          <a class="btn ghost" href="/guide?t=reading-political-youtube">How to read political videos</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="topics" aria-labelledby="topicsTitle">
+      <div class="wrap">
+        <div class="topics-head">
+          <h2 id="topicsTitle">All topics</h2>
+          <div class="filters" role="group" aria-label="Filter topics" id="filters"></div>
+        </div>
+        <ul class="grid" id="grid"></ul>
+        <p class="load-error" id="loadError" role="alert" hidden>The guide couldn't load. Refresh the page to try again.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- Entry view -->
+  <article id="entryView" hidden>
+    <section class="hero entry-hero">
+      <div class="wrap">
+        <p class="crumbs"><a href="/guide">Guide</a> <span aria-hidden="true">/</span> <span id="eCat"></span></p>
+        <p class="badge" id="eStatus"></p>
+        <h1 id="eTitle"></h1>
+        <p class="lede" id="eSummary"></p>
+        <p class="checked" id="eChecked"></p>
+        <div class="hero-cta">
+          <a class="btn primary" id="eAsk" href="/">Ask the World Desk about this</a>
+          <a class="btn ghost" href="/guide">Back to all topics</a>
+        </div>
+      </div>
+    </section>
+    <section class="entry-body">
+      <div class="wrap entry-grid">
+        <div class="prose" id="eBody"></div>
+        <aside class="facts" aria-labelledby="factsTitle">
+          <h2 id="factsTitle">At a glance</h2>
+          <dl id="eDetails"></dl>
+        </aside>
+      </div>
+    </section>
+    <section class="entry-sources">
+      <div class="wrap two-col">
+        <div>
+          <h2>Sources</h2>
+          <ol class="src-list" id="eSources"></ol>
+        </div>
+        <div id="eFolderWrap">
+          <h2>Coverage we reviewed</h2>
+          <ul class="folder-list" id="eFolder"></ul>
+        </div>
+      </div>
+    </section>
+    <section class="related">
+      <div class="wrap">
+        <h2>Related topics</h2>
+        <ul class="grid" id="eRelated"></ul>
+      </div>
+    </section>
+  </article>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>AI&amp;I World Desk guide · Checked October 19, 2026. Facts change fast, so confirm before acting. Nothing here is financial advice.</p>
+  </div>
+</footer>
+<script src="/assets/prefs.js" defer></script>
+<script src="/assets/guide.js" defer></script>
+</body>
+</html>
