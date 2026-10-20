@@ -251,8 +251,26 @@ button, textarea { font: inherit; color: inherit; }
 .card h2 { font-size: 1.1rem; font-weight: 700; }
 .card-sub { color: var(--muted); font-size: 0.86rem; margin-top: 0.15rem; }
 
+/* Heights below are only a first-paint fallback; engine.js measures the real window and sets the live height. */
 .chat-slot { min-width: 0; height: clamp(26rem, 72svh, 38rem); }
 .chat-card { height: 100%; display: flex; flex-direction: column; gap: 0.6rem; container-type: inline-size; container-name: chat; }
+
+/* Side cards: flex columns with a measured max-height; only .card-scroll scrolls, the rest stays pinned */
+.side { display: flex; flex-direction: column; }
+.side > * { flex: none; }
+.side > .pill { align-self: center; }
+@media (min-width: 700px) { .side > .pill { align-self: flex-start; } }
+.side > .card-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.card-scroll > *, .log > * { flex: none; }
+.more-cue {
+  font-size: 0.78rem; font-weight: 700; color: var(--text); text-align: center;
+  padding: 0.2rem 0.6rem; margin: 0.35rem auto 0; border-radius: 999px;
+  background: var(--panel-2); border: 1px solid var(--line); width: max-content; max-width: 100%;
+}
+.more-cue[hidden] { display: none; }
+.chat-card > .more-cue { margin-top: -0.25rem; flex: none; }
+.chat-card > * { flex: none; }
+.chat-card > .log { flex: 1 1 auto; }
 
 /* phones: center aligned except lists */
 .side { text-align: center; }
@@ -301,6 +319,7 @@ button, textarea { font: inherit; color: inherit; }
   background: var(--panel-2); border: 1px solid var(--line); padding: 0.15rem 0.6rem; border-radius: 999px;
 }
 .log {
+  position: relative;
   flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
   display: flex; flex-direction: column; gap: 0.6rem; padding: 0.15rem 0.1rem 0.25rem;
 }
@@ -339,7 +358,7 @@ textarea#chatInput {
   background: var(--panel-2); color: var(--text); padding: 0.6rem 0.75rem; line-height: 1.4;
   min-height: 2.6rem; max-height: 8.5rem; overflow-y: hidden; font-size: 1rem;
 }
-textarea#chatInput::placeholder { color: var(--muted); opacity: 1; }
+textarea#chatInput::placeholder { color: var(--muted); opacity: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 textarea#chatInput.scrolls { overflow-y: auto; }
 .mic-btn {
   width: 2.6rem; height: 2.6rem; flex: 0 0 auto; border-radius: 50%; border: 1px solid var(--line);

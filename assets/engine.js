@@ -196,8 +196,14 @@
       div.appendChild(s);
     }
     log.appendChild(div);
-    log.scrollTop = log.scrollHeight;
+    if (role === 'user' || opts.error) log.scrollTop = log.scrollHeight;
+    else showFirstLine(div);
+    updateCues();
     return div;
+  }
+  function showFirstLine(el) {
+    // A new reply opens at its first line, never scrolled to its end (rule 20c).
+    log.scrollTop = Math.max(0, el.offsetTop - 6);
   }
   function renderLog() {
     var intro = log.querySelector('.intro');
@@ -261,7 +267,7 @@
       var n = document.createElement('span'); n.className = 'name'; n.textContent = m.title;
       var s = document.createElement('span'); s.className = 'sc'; s.textContent = m.score !== null ? String(m.score) : '—';
       b.appendChild(r); b.appendChild(n); b.appendChild(s);
-      b.addEventListener('click', function () { state.selectedId = m.id; persist(); renderCards(); });
+      b.addEventListener('click', function () { state.selectedId = m.id; persist(); renderCards(); $('detailScroll').scrollTop = 0; });
       li.appendChild(b);
       ol.appendChild(li);
     });
@@ -291,7 +297,60 @@
     } else { link.hidden = true; }
     $('nextWrap').hidden = !state.nextStep;
     $('nextText').textContent = state.nextStep || '';
+    layout();
   }
+
+  // ---------- sizing from the real window (rule 20a/b) ----------
+  var board = $('board'), chatSlot = $('chatSlot');
+  var sideCards = [$('topCard'), $('shortCard'), $('detailCard')];
+  var CUES = [[log, $('logCue')], [$('topScroll'), $('topCue')], [$('shortScroll'), $('shortCue')], [$('detailScroll'), $('detailCue')]];
+  var BOTTOM_GAP = 16;
+  function updateCues() {
+    CUES.forEach(function (pair) {
+      var box = pair[0], cue = pair[1];
+      var more = box.scrollHeight - box.scrollTop - box.clientHeight > 4;
+      cue.hidden = !more;
+    });
+  }
+  var layoutQueued = false;
+  function layout() {
+    if (layoutQueued) return;
+    layoutQueued = true;
+    requestAnimationFrame(function () {
+      layoutQueued = false;
+      var vh = window.innerHeight;
+      var nav = document.querySelector('.nav');
+      var navH = nav ? nav.getBoundingClientRect().height : 0;
+      var rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      var wide = window.matchMedia('(min-width: 1100px)').matches;
+      var avail;
+      if (wide) {
+        // all four cards share the first row: fit them between the board's top and the window's bottom
+        var boardTop = board.getBoundingClientRect().top + window.scrollY;
+        avail = vh - boardTop - BOTTOM_GAP;
+      } else {
+        // stacked layouts: each card fits in one screen below the sticky nav when scrolled to
+        avail = vh - navH - 2 * BOTTOM_GAP;
+      }
+      avail = Math.max(avail, 12 * rem);
+      chatSlot.style.height = Math.round(avail) + 'px';
+      sideCards.forEach(function (c) { c.style.maxHeight = Math.round(avail) + 'px'; });
+      updateCues();
+    });
+  }
+  window.addEventListener('resize', layout);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', layout);
+  document.addEventListener('prefs:change', layout);
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(layout);
+    var hero = document.querySelector('.hero');
+    if (hero) ro.observe(hero);
+    var navEl = document.querySelector('.nav');
+    if (navEl) ro.observe(navEl);
+    ro.observe(log);
+  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+  CUES.forEach(function (pair) { pair[0].addEventListener('scroll', updateCues, { passive: true }); });
 
   // ---------- thinking indicator ----------
   var thinking = null, t1 = null, t2 = null;
